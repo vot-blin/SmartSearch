@@ -1,7 +1,7 @@
 import http from './http'
 
 export const aiApi = {
-  search(query) {
-    return http.post('/ai/search', { query })
+  search(query, limit = 500) {
+    return http.post('/ai/search', { query, limit })
   },
 }

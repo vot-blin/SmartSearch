@@ -20,7 +20,7 @@ public class AiController : ControllerBase
         if (!ModelState.IsValid || string.IsNullOrWhiteSpace(req.Query))
             return BadRequest(new { message = "Запрос не может быть пустым" });
 
-        var limit = req.Limit > 0 ? req.Limit : 200;
+        var limit = req.Limit > 0 ? Math.Min(req.Limit, 500) : 500;
         var result = await _aiSearch.SearchAsync(req.Query, limit);
         return Ok(result);
 

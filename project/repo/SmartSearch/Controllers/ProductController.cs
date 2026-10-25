@@ -37,7 +37,7 @@ public class ProductController : ControllerBase
         [FromQuery] decimal? maxPrice = null,
              [FromQuery] int limit = 200)
     {
-        // ✅ Правильный порядок параметров
+        // Правильный порядок параметров
         var products = await _products.SearchAsync(
             query: q,
             category: category,

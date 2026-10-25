@@ -14,12 +14,12 @@ export const useProductsStore = defineStore('products', () => {
     const totalPages = ref(1)
 
     const filteredProducts = computed(() => {
-        if(!query.value.trim()) return products.value
+        if (!query.value.trim()) return products.value
         const q = query.value.toLowerCase()
         return products.value.filter(p =>
             (p.title || '').toLowerCase().includes(q) ||
             (p.description || '').toLowerCase().includes(q) ||
-            (p.category || '').toLowerCase().includes(q) 
+            (p.category || '').toLowerCase().includes(q)
         )
     })
 
@@ -32,6 +32,7 @@ export const useProductsStore = defineStore('products', () => {
         error.value = ''
         try {
             const res = await productsApi.getAll(page, pageSize.value)
+            console.log('[Catalog] API response:', { total: res.data.total, totalPages: res.data.totalPages, page: res.data.page, pageSize: res.data.pageSize, productsCount: (res.data.products || []).length })
             products.value = res.data.products || res.data || []
             totalCount.value = res.data.total || products.value.length
             totalPages.value = res.data.totalPages || 1
@@ -101,18 +102,18 @@ export const useProductsStore = defineStore('products', () => {
         error,
         loaded,
         query,
-        filteredProducts,
-        getById,
-        fetchall,
-        search,
-        setProducts,
         currentPage,
         pageSize,
         totalCount,
         totalPages,
+        filteredProducts,
+        getById,
+        fetchall,
         fetchPage,
         nextPage,
         prevPage,
         goToPage,
+        search,
+        setProducts,
     }
 })

@@ -58,16 +58,51 @@
     </div>
 
     <!-- Результаты поиска -->
-    <div v-if="results.length" class="results-section">
-      <h3>Результаты поиска ({{ results.length }} товаров)</h3>
+    <div v-if="allResults.length" class="results-section">
+      <h3>Результаты поиска ({{ allResults.length }} товаров)</h3>
       <div class="grid-products">
         <ProductCard
-          v-for="product in results"
+          v-for="product in pagedResults"
           :key="product.id"
           :product="product"
           @add-to-cart="cart.addToCart"
         />
       </div>
+
+      <div v-if="aiTotalPages > 1" class="pagination">
+        <button
+          class="page-btn"
+          :disabled="aiCurrentPage === 1"
+          @click="aiCurrentPage--"
+        >
+          ← Назад
+        </button>
+
+        <div class="page-numbers">
+          <button
+            v-for="p in visibleAiPages"
+            :key="p"
+            class="page-num"
+            :class="{ active: p === aiCurrentPage }"
+            @click="aiCurrentPage = p"
+          >
+            {{ p }}
+          </button>
+        </div>
+
+        <button
+          class="page-btn"
+          :disabled="aiCurrentPage === aiTotalPages"
+          @click="aiCurrentPage++"
+        >
+          Вперёд →
+        </button>
+      </div>
+
+      <p class="page-info">
+        Страница {{ aiCurrentPage }} из {{ aiTotalPages }}
+        (всего {{ allResults.length }} товаров)
+      </p>
     </div>
 
     <!-- Загрузка -->
@@ -77,27 +112,57 @@
     </div>
 
     <!-- Пустой результат -->
-    <div v-if="!loading && searched && results.length === 0 && !analysis" class="empty-state">
+    <div v-if="!loading && searched && allResults.length === 0 && !analysis" class="empty-state">
       Ничего не найдено
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import SearchSwitch from '@/components/SearchSwitch.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { aiApi } from '@/api/ai'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 
+const AI_PAGE_SIZE = 20
+
 const query = ref('')
-const results = ref([])
+const allResults = ref([])
 const analysis = ref(null)
 const loading = ref(false)
 const searched = ref(false)
+const aiCurrentPage = ref(1)
 const cart = useCartStore()
 const auth = useAuthStore()
+
+const aiTotalPages = computed(() =>
+  Math.max(1, Math.ceil(allResults.value.length / AI_PAGE_SIZE))
+)
+
+const pagedResults = computed(() => {
+  const start = (aiCurrentPage.value - 1) * AI_PAGE_SIZE
+  return allResults.value.slice(start, start + AI_PAGE_SIZE)
+})
+
+const visibleAiPages = computed(() => {
+  const total = aiTotalPages.value
+  const current = aiCurrentPage.value
+  const pages = []
+  const maxButtons = 7
+  let start = Math.max(1, current - Math.floor(maxButtons / 2))
+  let end = Math.min(total, start + maxButtons - 1)
+  start = Math.max(1, end - maxButtons + 1)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
+
+watch(aiTotalPages, () => {
+  if (aiCurrentPage.value > aiTotalPages.value) {
+    aiCurrentPage.value = 1
+  }
+})
 
 function formatGender(gender) {
   const genders = {
@@ -114,29 +179,21 @@ async function search() {
   
   loading.value = true
   searched.value = true
-  results.value = []
+  allResults.value = []
   analysis.value = null
+  aiCurrentPage.value = 1
   
   try {
-    const res = await aiApi.search(query.value)
+    const res = await aiApi.search(query.value, 500)
     
-    console.log('API Response:', res.data)
+    console.log('[AI Search] API response:', { productsCount: (res.data.products || []).length, hasAnalysis: !!res.data.analysis, limitSent: 500 })
     
-    // Сохраняем анализ и продукты
     analysis.value = res.data.analysis || null
-    results.value = res.data.products || []
-    
-    console.log('Products count:', results.value.length)
-    if (results.value.length > 0) {
-      console.log('First product:', results.value[0])
-    }
+    allResults.value = res.data.products || []
     
   } catch (error) {
     console.error('Search error:', error)
-    if (error.response) {
-      console.error('Error details:', error.response.data)
-    }
-    results.value = []
+    allResults.value = []
   } finally {
     loading.value = false
   }
@@ -229,5 +286,70 @@ async function search() {
   text-align: center;
   padding: 40px;
   color: #6e6782;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+}
+
+.page-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2e0ea;
+  background: #fff;
+  color: #4a3a6e;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f5f3f8;
+  border-color: #c4bcd6;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-num {
+  min-width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e2e0ea;
+  background: #fff;
+  color: #4a3a6e;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.page-num:hover {
+  background: #f5f3f8;
+  border-color: #c4bcd6;
+}
+
+.page-num.active {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+}
+
+.page-info {
+  text-align: center;
+  color: #6e6782;
+  font-size: 13px;
+  margin-top: 12px;
 }
 </style>

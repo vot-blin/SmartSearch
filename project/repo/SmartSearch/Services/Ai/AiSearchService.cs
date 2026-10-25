@@ -24,7 +24,7 @@ public class AiSearchService
         _logger = logger;
     }
 
-    public async Task<AiSearchResponse> SearchAsync(string userQuery, int limit = 200   )
+    public async Task<AiSearchResponse> SearchAsync(string userQuery, int limit = 500)
     {
         _logger.LogInformation("=== AI SEARCH ===");
         _logger.LogInformation("User query: '{UserQuery}'", userQuery);

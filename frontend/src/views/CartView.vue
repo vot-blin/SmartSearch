@@ -1,97 +1,97 @@
 <template>
   <div class="page">
-    <div class="section-box">
-      <h1 class="page-title">Корзина</h1>
-      <p class="subtitle">Проверяй товары и изменяй количество прямо здесь.</p>
+    <div>
+      <span class="eyebrow">ТВОИ НАХОДКИ</span>
+      <h1 class="page-title">
+        Корзина<span class="heading-count">{{ cart.totalCount }}</span>
+      </h1>
+      <p class="text">Всё, что понравилось, — в одном месте.</p>
     </div>
-
-    <div v-if="cart.items.length === 0" class="empty-state">
-      Корзина пуста
+    <div v-if="!cart.items.length" class="empty-state">
+      <AppIcon name="bag" />
+      <h2>Здесь будут твои находки</h2>
+      <p>Добавляй понравившиеся товары из каталога или поиска.</p>
+      <RouterLink to="/" class="button-primary"
+        >Перейти в каталог<AppIcon name="arrow"
+      /></RouterLink>
     </div>
-
     <div v-else class="cart-grid">
-      <div class="items">
-        <div v-for="item in cart.items" :key="item.id" class="item card-base">
-          <img :src="item.image" :alt="item.title" class="thumb" />
-          <div class="meta">
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.price }} ₽</p>
+      <div class="cart-items">
+        <article v-for="item in cart.items" :key="item.id" class="cart-item">
+          <RouterLink :to="`/product/${item.id}`"
+            ><ProductImage :product="item"
+          /></RouterLink>
+          <div class="cart-item-info">
+            <span class="product-category">{{ item.category }}</span
+            ><RouterLink :to="`/product/${item.id}`"
+              ><h3>{{ item.title }}</h3></RouterLink
+            ><strong>{{ priceLabel(item) }}</strong>
+            <div class="quantity-controls">
+              <button
+                :disabled="item.quantity <= 1"
+                :aria-label="`Уменьшить количество: ${item.title}`"
+                @click="cart.updateQuantity(item.id, item.quantity - 1)"
+              >
+                <AppIcon name="minus" /></button
+              ><span aria-live="polite">{{ item.quantity }}</span
+              ><button
+                :aria-label="`Увеличить количество: ${item.title}`"
+                @click="cart.updateQuantity(item.id, item.quantity + 1)"
+              >
+                <AppIcon name="plus" />
+              </button>
+            </div>
           </div>
-          <div class="controls">
-            <button class="button-secondary" @click="cart.updateQuantity(item.id, item.quantity - 1)">-</button>
-            <span>{{ item.quantity }}</span>
-            <button class="button-secondary" @click="cart.updateQuantity(item.id, item.quantity + 1)">+</button>
-            <button class="button-danger" @click="cart.removeFromCart(item.id)">Удалить</button>
-          </div>
-        </div>
+          <button
+            class="icon-button"
+            :aria-label="`Удалить: ${item.title}`"
+            @click="cart.removeFromCart(item.id)"
+          >
+            <AppIcon name="trash" />
+          </button>
+        </article>
       </div>
-
       <aside class="summary section-box">
-        <h3>Итого</h3>
-        <p>Товаров: {{ cart.totalCount }}</p>
-        <p><strong>{{ cart.totalPrice }} ₽</strong></p>
-        <button class="button-primary full" @click="cart.clearCart">Очистить корзину</button>
+        <h2>Твоя подборка</h2>
+        <div class="summary-row">
+          <span>Количество товаров</span><strong>{{ cart.totalCount }}</strong>
+        </div>
+        <div
+          v-for="total in totals"
+          :key="total.currency"
+          class="summary-total"
+        >
+          <span>Итого</span><strong>{{ priceLabel(total) }}</strong>
+        </div>
+        <p class="summary-note">
+          Корзина сохраняется в этом браузере. Оформление заказа пока
+          недоступно.
+        </p>
+        <RouterLink to="/search" class="button-primary full"
+          >Продолжить поиск<AppIcon name="arrow" /></RouterLink
+        ><button class="button-secondary full" @click="cart.clearCart">
+          Очистить корзину
+        </button>
       </aside>
     </div>
   </div>
 </template>
-
 <script setup>
-import { useCartStore } from '@/stores/cart'
-const cart = useCartStore()
+import { computed } from "vue";
+import { useCartStore } from "@/stores/cart";
+import { priceLabel } from "@/utils/products";
+import ProductImage from "@/components/ProductImage.vue";
+import AppIcon from "@/components/AppIcon.vue";
+const cart = useCartStore();
+const totals = computed(() => {
+  const sums = new Map();
+  for (const item of cart.items) {
+    const currency = item.currency || "RUB";
+    sums.set(
+      currency,
+      (sums.get(currency) || 0) + Number(item.price) * item.quantity,
+    );
+  }
+  return [...sums].map(([currency, price]) => ({ currency, price }));
+});
 </script>
-
-<style scoped>
-.page {
-  display: grid;
-  gap: 20px;
-}
-
-.subtitle {
-  margin: 0;
-  color: #6e6782;
-}
-
-.cart-grid {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 20px;
-  align-items: start;
-}
-
-.items {
-  display: grid;
-  gap: 14px;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: 84px 1fr auto;
-  gap: 16px;
-  align-items: center;
-  padding: 14px;
-}
-
-.thumb {
-  width: 84px;
-  height: 84px;
-  border-radius: 14px;
-  object-fit: cover;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.summary {
-  position: sticky;
-  top: 100px;
-}
-
-.full {
-  width: 100%;
-}
-</style>

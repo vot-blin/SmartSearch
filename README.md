@@ -30,8 +30,7 @@ npm run dev
 Из корня репозитория:
 
 ```powershell
-Copy-Item .env.example .env
-# Укажите OPENROUTER_API_KEY в .env для анализа поисковых запросов.
+# Убедитесь, что файл .env существует в корне проекта и содержит OPENROUTER_API_KEY для анализа поисковых запросов.
 docker compose up -d --build
 ```
 
@@ -50,8 +49,7 @@ docker compose up -d postgres qdrant
 Перед локальным запуском API остановите его контейнер, если он уже занимает тот же порт. Затем выполните следующие команды из каталога `backend/`:
 
 ```powershell
-Copy-Item .env.example .env
-# Укажите OpenRouter__ApiKey в backend/.env.
+# Убедитесь, что файл .env существует в папке backend/ и содержит OpenRouter__ApiKey.
 dotnet restore
 dotnet run --no-launch-profile --urls http://localhost:5233
 ```

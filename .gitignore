@@ -1,1 +1,17 @@
 .vs/
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/dist-ssr/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.user
+*.suo
+*.log
+*.local
+.DS_Store
+**/.env
+**/.env.*
+!**/.env.example

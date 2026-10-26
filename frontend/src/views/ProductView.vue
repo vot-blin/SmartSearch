@@ -1,109 +1,93 @@
 <template>
-  <div v-if="products.loading" class="empty-state">Загрузка...</div>
-  <div v-else-if="product" class="product section-box">
-    <img :src="product.image" :alt="product.title" class="image" />
-    <div class="info">
-      <span class="category-tag">{{ product.category }}</span>
-      <h1 class="title">{{ product.title }}</h1>
-      <p class="desc">{{ product.description }}</p>
-      <p class="price">{{ product.price }} ₽</p>
-      <button class="button-primary add-btn" @click="addAndNotify">В корзину</button>
-      <p v-if="added" class="added-msg">Добавлено в корзину!</p>
+  <div class="page">
+    <RouterLink to="/" class="back-link"
+      ><AppIcon name="back" /> В каталог</RouterLink
+    >
+    <div v-if="loading" class="loading-state" role="status">
+      <div class="spinner"></div>
+      <p>Загружаем товар…</p>
     </div>
+    <div v-else-if="error" class="empty-state" role="alert">
+      <h1 class="page-title">{{ error }}</h1>
+      <button class="button-primary" @click="load">Попробовать снова</button>
+    </div>
+    <article v-else-if="product" class="product-detail">
+      <ProductImage :product="product" />
+      <div>
+        <span class="category-tag">{{
+          product.category || "Каталог SmartSearch"
+        }}</span>
+        <h1 class="page-title">{{ product.title }}</h1>
+        <p class="detail-price">{{ priceLabel(product) }}</p>
+        <p class="detail-description">
+          {{
+            product.description || "Описание этого товара пока не добавлено."
+          }}
+        </p>
+        <dl v-if="specs.length" class="detail-specs">
+          <div v-for="[label, value] in specs" :key="label">
+            <dt>{{ label }}</dt>
+            <dd>{{ value }}</dd>
+          </div>
+        </dl>
+        <button class="button-primary" @click="add">
+          <AppIcon :name="added ? 'check' : 'bag'" />{{
+            added ? "Добавлено в корзину" : "В корзину"
+          }}
+        </button>
+        <p class="added-msg" aria-live="polite">
+          {{
+            added
+              ? "Товар сохранён. Ты можешь изменить количество в корзине."
+              : ""
+          }}
+        </p>
+      </div>
+    </article>
   </div>
-  <div v-else class="empty-state">Товар не найден</div>
 </template>
-
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useProductsStore } from '@/stores/products'
-import { useCartStore } from '@/stores/cart'
-
-const route = useRoute()
-const products = useProductsStore()
-const cart = useCartStore()
-const added = ref(false)
-
-onMounted(() => products.fetchall())
-
-const product = computed(() => products.getById(route.params.id))
-
-function addAndNotify() {
-  if (!product.value) return
-  cart.addToCart(product.value)
-  added.value = true
-  setTimeout(() => { added.value = false }, 2000)
-}
-</script>
-
-<style scoped>
-.product {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  padding: 24px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 16px;
-}
-
-.info {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.category-tag {
-  display: inline-block;
-  font-size: 12px;
-  color: #7c3aed;
-  background: rgba(124, 58, 237, 0.10);
-  padding: 6px 10px;
-  border-radius: 999px;
-  width: fit-content;
-}
-
-.title {
-  margin: 0;
-  font-size: 26px;
-  line-height: 1.2;
-}
-
-.desc {
-  margin: 0;
-  color: #6e6782;
-  line-height: 1.6;
-}
-
-.price {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f1b2e;
-}
-
-.add-btn {
-  width: fit-content;
-  padding: 14px 28px;
-  font-size: 16px;
-}
-
-.added-msg {
-  margin: 0;
-  color: var(--success);
-  font-weight: 500;
-}
-
-@media (max-width: 640px) {
-  .product {
-    grid-template-columns: 1fr;
+import { ref, computed, watch } from "vue";
+import { useRoute } from "vue-router";
+import { productsApi } from "@/api/products";
+import { useCartStore } from "@/stores/cart";
+import { priceLabel } from "@/utils/products";
+import ProductImage from "@/components/ProductImage.vue";
+import AppIcon from "@/components/AppIcon.vue";
+const route = useRoute(),
+  cart = useCartStore();
+const product = ref(null),
+  loading = ref(false),
+  error = ref(""),
+  added = ref(false);
+let request = 0;
+const specs = computed(() =>
+  [
+    ["Категория", product.value?.category],
+    ["Подкатегория", product.value?.subCategory1],
+  ].filter((item) => item[1]),
+);
+async function load() {
+  const current = ++request;
+  loading.value = true;
+  error.value = "";
+  added.value = false;
+  try {
+    const { data } = await productsApi.getById(route.params.id);
+    if (current === request) product.value = data;
+  } catch (err) {
+    if (current === request)
+      error.value =
+        err.response?.status === 404
+          ? "Товар не найден"
+          : "Не удалось загрузить товар";
+  } finally {
+    if (current === request) loading.value = false;
   }
 }
-</style>
+function add() {
+  cart.addToCart(product.value);
+  added.value = true;
+}
+watch(() => route.params.id, load, { immediate: true });
+</script>

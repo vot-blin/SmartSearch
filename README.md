@@ -19,7 +19,6 @@
 ```powershell
 cd frontend
 npm ci
-Copy-Item .env.example .env
 npm run dev
 ```
 

@@ -5,7 +5,7 @@
       <h1 class="page-title">
         Корзина<span class="heading-count">{{ cart.totalCount }}</span>
       </h1>
-      <p class="text">Всё, что понравилось, — в одном месте.</p>
+      <p class="text">Всё, что понравилось, — будет здесь.</p>
     </div>
     <div v-if="!cart.items.length" class="empty-state">
       <AppIcon name="bag" />
@@ -89,7 +89,7 @@ const totals = computed(() => {
     const currency = item.currency || "RUB";
     sums.set(
       currency,
-      (sums.get(currency) || 0) + Number(item.price) * item.quantity,
+      (sums.get(currency) || 0) + Number(item.price) * item.quantity
     );
   }
   return [...sums].map(([currency, price]) => ({ currency, price }));

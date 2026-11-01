@@ -6,7 +6,11 @@
     <footer class="site-footer">
       <BrandMark />
       <p>Опиши словами. Найди по смыслу.</p>
-      <span class="footer-slogan">ПОНЯТЬ. НАЙТИ. ВЫБРАТЬ.</span>
+      <nav class="footer-links" aria-label="Ссылки проекта">
+        <a href="https://github.com/vot-blin/SmartSearch/tree/main" target="_blank" rel="noopener noreferrer">Код SmartSearch <span aria-hidden="true">↗</span></a>
+        <a href="https://smartsearch-landing.pages.dev/" target="_blank" rel="noopener noreferrer">О проекте <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/Luostra/SmartSearchLanding" target="_blank" rel="noopener noreferrer">Код лендинга <span aria-hidden="true">↗</span></a>
+      </nav>
     </footer>
   </div>
 </template>

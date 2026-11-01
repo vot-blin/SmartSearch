@@ -1,16 +1,10 @@
 <template>
   <div class="auth-page">
     <section class="auth-story">
-      <span class="eyebrow">ПОИСК, КОТОРЫЙ ПОНИМАЕТ</span>
-      <h1>Хорошие находки начинаются с твоих слов.</h1>
+      <h1>{{ register ? "Добро пожаловать в SmartSearch" : "Рады видеть тебя снова" }}</h1>
       <p>
-        Войди в SmartSearch, чтобы искать товары по смыслу — так, как ты их
-        представляешь.
+        {{ register ? "Создай аккаунт, чтобы пользоваться поиском по смыслу." : "Войди в аккаунт, чтобы продолжить поиск по смыслу." }}
       </p>
-      <img src="/brand/smartsearch.svg" alt="" width="220" height="220" /><span
-        class="brand-slogan"
-        >ПОНЯТЬ. НАЙТИ. ВЫБРАТЬ.</span
-      >
     </section>
     <section class="auth-form-wrap">
       <span class="eyebrow">{{
@@ -22,8 +16,8 @@
       <p class="text">
         {{
           register
-            ? "Всё готово для твоих новых находок."
-            : "Твои идеи. Наш поиск. Отличные находки."
+            ? "Укажи имя, email и придумай пароль."
+            : "Введи email и пароль своего аккаунта."
         }}
       </p>
       <form class="form" @submit.prevent="submit">

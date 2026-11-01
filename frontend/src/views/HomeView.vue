@@ -38,24 +38,17 @@
         <span class="art-orbit orbit-one"></span
         ><span class="art-orbit orbit-two"></span>
         <div class="art-label">МЕНЬШЕ ФИЛЬТРОВ. БОЛЬШЕ СМЫСЛА.</div>
-        <img
-          src="/brand/smartsearch.svg"
-          class="hero-symbol"
-          alt="Логотип SmartSearch"
-          width="300"
-          height="300"
-        />
+        <AnimatedBrand class="hero-symbol" />
         <div class="query-bubble">
-          <AppIcon name="search" /><span>«Что-то мягкое и фиолетовое»</span>
+          <AppIcon name="search" /><span>«Красная хлопковая рубашка»</span>
         </div>
         <div class="meaning-card">
           <div>
             <span class="meaning-icon"><AppIcon name="spark" /></span
-            ><strong>Понимаем детали</strong
-            ><span class="demo-tag">пример</span>
+            ><strong>Ищем рубашку</strong><span class="demo-tag">пример</span>
           </div>
           <div class="meaning-tags">
-            <span>Мягкая фактура</span><span>Фиолетовый</span>
+            <span>Красная</span><span>Хлопок</span>
           </div>
         </div>
         <div class="art-foot">
@@ -66,7 +59,7 @@
     <section class="catalog-section" aria-labelledby="catalog-title">
       <div class="section-heading">
         <div>
-          <span class="eyebrow">ВЫБИРАЙ СВОЁ</span>
+          <span class="eyebrow"></span>
           <h2 id="catalog-title">
             Каталог товаров
             <span
@@ -140,7 +133,7 @@
     <section class="discovery-banner">
       <span class="banner-icon"><AppIcon name="spark" /></span>
       <div>
-        <h2>Не ищи точное слово.<br />Найди то самое.</h2>
+        <h2>Не ищи точное слово.<br />Найди то, что нужно.</h2>
         <p>Опиши цвет, настроение или детали — начни с того, что важно тебе.</p>
       </div>
       <RouterLink to="/ai-search" class="button-primary"
@@ -150,6 +143,7 @@
   </div>
 </template>
 <script setup>
+import AnimatedBrand from "@/components/AnimatedBrand.vue";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import ProductCard from "@/components/ProductCard.vue";
@@ -168,11 +162,11 @@ function submitSearch(text = query.value) {
 const visiblePages = computed(() => {
   const start = Math.max(
     1,
-    Math.min(products.currentPage - 2, products.totalPages - 4),
+    Math.min(products.currentPage - 2, products.totalPages - 4)
   );
   return Array.from(
     { length: Math.min(5, products.totalPages) },
-    (_, i) => start + i,
+    (_, i) => start + i
   );
 });
 onMounted(() => products.fetchall());

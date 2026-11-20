@@ -2,22 +2,23 @@
   <header class="site-header">
     <div class="header-inner">
       <RouterLink to="/" class="brand-link" aria-label="SmartSearch — главная"
-        ><BrandMark
+        ><BrandMark animated
       /></RouterLink>
       <nav class="main-nav" aria-label="Основная навигация">
-        <RouterLink to="/" exact-active-class="selected">Каталог</RouterLink>
-        <RouterLink to="/search" active-class="selected">Поиск</RouterLink>
+        <RouterLink to="/" exact-active-class="selected"><span class="header-label">Каталог</span></RouterLink>
+        <RouterLink to="/search" active-class="selected"><span class="header-label">Поиск</span></RouterLink>
         <RouterLink to="/ai-search" active-class="selected" class="ai-nav"
-          ><AppIcon name="spark" /> AI-поиск</RouterLink
+          ><AppIcon name="spark" /><span class="header-label">AI-поиск</span></RouterLink
         >
       </nav>
       <div class="header-actions">
         <RouterLink
           to="/cart"
           class="cart-link"
+          exact-active-class="selected"
           :aria-label="`Корзина: ${cart.totalCount} товаров`"
-          ><AppIcon name="bag" /><span class="action-label">Корзина</span
-          ><span class="cart-count">{{ cart.totalCount }}</span></RouterLink
+          ><AppIcon name="bag" /><span class="action-label header-label">Корзина</span
+          ><span class="cart-count"><Transition name="cart-number"><span :key="cart.totalCount" class="cart-number">{{ cart.totalCount }}</span></Transition></span></RouterLink
         >
         <RouterLink
           :to="auth.isAuthenticated ? '/profile' : '/login'"
@@ -30,7 +31,7 @@
             <path d="M22 43 A21 21 0 0 1 22 1" pathLength="100" />
             <path d="M22 43 A21 21 0 0 0 22 1" pathLength="100" />
           </svg>
-          <template v-else><AppIcon name="user" /><span>Войти</span></template></RouterLink
+          <template v-else><AppIcon name="user" /><span class="header-label">Войти</span></template></RouterLink
         >
       </div>
     </div>

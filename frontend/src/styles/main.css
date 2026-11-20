@@ -154,7 +154,8 @@ img {
   letter-spacing: -1.1px;
   white-space: nowrap;
 }
-.brand-mark img {
+.brand-mark img,
+.brand-mark .brand-symbol {
   width: 48px;
   height: 48px;
   margin-right: 6px;
@@ -195,7 +196,7 @@ img {
   border-radius: 4px;
 }
 .ai-nav {
-  color: var(--purple);
+  color: inherit;
 }
 .header-actions {
   gap: 20px;
@@ -1292,7 +1293,8 @@ img {
   .brand-mark {
     font-size: 20px;
   }
-  .brand-mark img {
+  .brand-mark img,
+  .brand-mark .brand-symbol {
     width: 40px;
     height: 40px;
   }
@@ -1816,7 +1818,8 @@ img {
 }
 
 /* Both underline states exist so the previous tab contracts before the next expands. */
-.main-nav a::after {
+.main-nav a::after,
+.cart-link::after {
   content: '';
   position: absolute;
   bottom: -22px;
@@ -1829,7 +1832,8 @@ img {
   transform-origin: center;
   transition: transform 180ms ease-in;
 }
-.main-nav a.selected::after {
+.main-nav a.selected::after,
+.cart-link.selected::after {
   transform: scaleX(1);
   transition: transform 320ms cubic-bezier(.2,.8,.2,1) 140ms;
 }
@@ -1860,4 +1864,120 @@ img {
 }
 @media(prefers-reduced-motion:reduce) {
   .main-nav a::after { transition: none; }
+}
+
+/* Keep navigation hit areas as tall as their header row. */
+.site-header .header-label,
+.site-header .ai-nav > .icon,
+.site-header .cart-link > .icon,
+.site-header .brand-wordmark {
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1);
+  transform-origin: center;
+}
+.site-header .brand-wordmark {
+  transform-origin: left center;
+}
+@media (hover: hover) and (pointer: fine) {
+  .site-header a:hover .header-label,
+  .site-header .ai-nav:hover > .icon,
+  .site-header .cart-link:hover > .icon,
+  .site-header .brand-link:hover .brand-wordmark {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+.site-header a:focus-visible .header-label,
+.site-header .ai-nav:focus-visible > .icon,
+.site-header .cart-link:focus-visible > .icon,
+.site-header .brand-link:focus-visible .brand-wordmark {
+  transform: translateY(-1px) scale(1.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header a .header-label,
+  .site-header .ai-nav > .icon,
+  .site-header .cart-link > .icon,
+  .site-header .brand-link .brand-wordmark {
+    transition: none;
+    transform: none;
+  }
+}
+.header-inner {
+  min-height: 88px;
+  padding-top: 0;
+  padding-bottom: 0;
+  align-items: stretch;
+}
+.brand-link,
+.header-actions .account-link {
+  align-self: center;
+}
+.main-nav,
+.header-actions {
+  align-items: stretch;
+}
+.main-nav a,
+.cart-link {
+  position: relative;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.cart-link.selected {
+  color: var(--purple);
+}
+.main-nav a::after,
+.main-nav a.selected::after,
+.cart-link::after {
+  bottom: 2px;
+}
+.cart-count {
+  position: relative;
+  overflow: hidden;
+  width: 4ch;
+  min-width: 32px;
+  flex-shrink: 0;
+}
+@media (min-width: 1101px) {
+  .header-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .header-inner > .brand-link {
+    justify-self: start;
+  }
+  .header-inner > .header-actions {
+    justify-self: end;
+  }
+}
+.cart-number {
+  grid-area: 1 / 1;
+  font-variant-numeric: tabular-nums;
+}
+.cart-number-enter-active,
+.cart-number-leave-active {
+  transition: transform 280ms ease, opacity 280ms ease;
+}
+.cart-number-enter-from {
+  opacity: 0;
+  transform: translateY(100%) scale(.8);
+}
+.cart-number-leave-to {
+  opacity: 0;
+  transform: translateY(-100%) scale(.8);
+}
+@media (max-width: 760px) {
+  .header-inner {
+    row-gap: 0;
+  }
+  .header-actions {
+    min-height: 64px;
+  }
+  .main-nav {
+    padding-top: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cart-link::after,
+  .cart-number-enter-active,
+  .cart-number-leave-active {
+    transition: none;
+  }
 }

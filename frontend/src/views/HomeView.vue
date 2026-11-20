@@ -65,7 +65,7 @@
             <span
               v-if="!products.loading && !products.error"
               class="total-badge"
-              >{{ products.totalCount }}</span
+              >{{ products.products.length }} из {{ products.totalCount }}</span
             >
           </h2>
         </div>
@@ -105,6 +105,14 @@
           <button
             class="page-btn"
             :disabled="products.currentPage === 1"
+            aria-label="Первая страница"
+            @click="products.goToPage(1)"
+          >
+            « В начало
+          </button>
+          <button
+            class="page-btn"
+            :disabled="products.currentPage === 1"
             @click="products.prevPage()"
           >
             ← Назад</button
@@ -123,6 +131,14 @@
             @click="products.nextPage()"
           >
             Вперёд →
+          </button>
+          <button
+            class="page-btn"
+            :disabled="products.currentPage === products.totalPages"
+            aria-label="Последняя страница"
+            @click="products.goToPage(products.totalPages)"
+          >
+            В конец »
           </button>
         </nav>
         <p class="page-info">

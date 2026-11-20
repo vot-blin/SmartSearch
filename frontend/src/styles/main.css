@@ -840,6 +840,22 @@ img {
   border-color: var(--purple);
   color: #fff;
 }
+.page-btn,
+.page-num {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+.page-btn:hover:not(:disabled),
+.page-num:hover:not(:disabled):not(.active),
+.page-btn:focus-visible:not(:disabled),
+.page-num:focus-visible:not(:disabled):not(.active) {
+  background: var(--soft);
+  border-color: #c8b5fa;
+  color: var(--purple);
+}
+.page-num.active:hover:not(:disabled) {
+  background: var(--purple-dark);
+  border-color: var(--purple-dark);
+}
 .page-info {
   text-align: center;
   font-size: 11px;
@@ -1870,6 +1886,7 @@ img {
 .site-header .header-label,
 .site-header .ai-nav > .icon,
 .site-header .cart-link > .icon,
+.site-header .account-link > .icon,
 .site-header .brand-wordmark {
   transition: transform 220ms cubic-bezier(.2,.8,.2,1);
   transform-origin: center;
@@ -1881,6 +1898,7 @@ img {
   .site-header a:hover .header-label,
   .site-header .ai-nav:hover > .icon,
   .site-header .cart-link:hover > .icon,
+  .site-header .account-link:hover > .icon,
   .site-header .brand-link:hover .brand-wordmark {
     transform: translateY(-1px) scale(1.04);
   }
@@ -1888,6 +1906,7 @@ img {
 .site-header a:focus-visible .header-label,
 .site-header .ai-nav:focus-visible > .icon,
 .site-header .cart-link:focus-visible > .icon,
+.site-header .account-link:focus-visible > .icon,
 .site-header .brand-link:focus-visible .brand-wordmark {
   transform: translateY(-1px) scale(1.04);
 }
@@ -1895,6 +1914,7 @@ img {
   .site-header a .header-label,
   .site-header .ai-nav > .icon,
   .site-header .cart-link > .icon,
+  .site-header .account-link > .icon,
   .site-header .brand-link .brand-wordmark {
     transition: none;
     transform: none;

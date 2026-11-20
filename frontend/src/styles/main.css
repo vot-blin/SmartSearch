@@ -1633,11 +1633,14 @@ img {
   text-align: center;
   min-height: 48px;
 }
-.profile-logout {
+.profile-logout,
+.button-reset {
   transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease;
 }
 .profile-logout:hover:not(:disabled),
-.profile-logout:focus-visible {
+.profile-logout:focus-visible,
+.button-reset:hover:not(:disabled),
+.button-reset:focus-visible:not(:disabled) {
   background-color: #fff1f2;
   border-color: #fda4af;
   color: #be123c;

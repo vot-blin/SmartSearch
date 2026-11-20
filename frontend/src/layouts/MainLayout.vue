@@ -12,9 +12,13 @@
         <a href="https://github.com/Luostra/SmartSearchLanding" target="_blank" rel="noopener noreferrer">Код лендинга <span aria-hidden="true">↗</span></a>
       </nav>
     </footer>
+    <ScrollToBottom v-if="['home', 'search', 'ai-search'].includes(route.name)" :key="route.name" />
   </div>
 </template>
 <script setup>
 import AppHeader from "@/components/AppHeader.vue";
 import BrandMark from "@/components/BrandMark.vue";
+import ScrollToBottom from "@/components/ScrollToBottom.vue";
+import { useRoute } from "vue-router";
+const route = useRoute();
 </script>

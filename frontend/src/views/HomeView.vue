@@ -56,7 +56,7 @@
         </div>
       </div>
     </section>
-    <section class="catalog-section" aria-labelledby="catalog-title">
+    <section ref="catalogSection" class="catalog-section" aria-labelledby="catalog-title">
       <div class="section-heading">
         <div>
           <span class="eyebrow"></span>
@@ -106,37 +106,25 @@
             class="page-btn"
             :disabled="products.currentPage === 1"
             aria-label="Первая страница"
-            @click="products.goToPage(1)"
+            @click="changePage(1)"
           >
             « В начало
           </button>
           <button
-            class="page-btn"
-            :disabled="products.currentPage === 1"
-            @click="products.prevPage()"
-          >
-            ← Назад</button
-          ><button
             v-for="p in visiblePages"
             :key="p"
             class="page-num"
             :class="{ active: p === products.currentPage }"
             :aria-current="p === products.currentPage ? 'page' : undefined"
-            @click="products.goToPage(p)"
+            @click="changePage(p)"
           >
-            {{ p }}</button
-          ><button
-            class="page-btn"
-            :disabled="products.currentPage === products.totalPages"
-            @click="products.nextPage()"
-          >
-            Вперёд →
+            {{ p }}
           </button>
           <button
             class="page-btn"
             :disabled="products.currentPage === products.totalPages"
             aria-label="Последняя страница"
-            @click="products.goToPage(products.totalPages)"
+            @click="changePage(products.totalPages)"
           >
             В конец »
           </button>
@@ -146,21 +134,11 @@
         </p>
       </template>
     </section>
-    <section class="discovery-banner">
-      <span class="banner-icon"><AppIcon name="spark" /></span>
-      <div>
-        <h2>Не ищи точное слово.<br />Найди то, что нужно.</h2>
-        <p>Опиши цвет, настроение или детали — начни с того, что важно тебе.</p>
-      </div>
-      <RouterLink to="/ai-search" class="button-primary"
-        >Попробовать AI-поиск <AppIcon name="arrow"
-      /></RouterLink>
-    </section>
   </div>
 </template>
 <script setup>
 import AnimatedBrand from "@/components/AnimatedBrand.vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import ProductCard from "@/components/ProductCard.vue";
 import AppIcon from "@/components/AppIcon.vue";
@@ -170,6 +148,19 @@ const products = useProductsStore();
 const cart = useCartStore();
 const router = useRouter();
 const query = ref("");
+const catalogSection = ref(null);
+async function changePage(page) {
+  if (products.loading || page === products.currentPage || page < 1 || page > products.totalPages) return;
+  await products.goToPage(page);
+  await nextTick();
+  if (products.error || !catalogSection.value) return;
+  const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+  const top = window.scrollY + catalogSection.value.getBoundingClientRect().top - headerHeight - 20;
+  window.scrollTo({
+    top: Math.max(0, top),
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+  });
+}
 const examples = ["Уютный свитер", "Кеды на каждый день", "Сумка для учёбы"];
 function submitSearch(text = query.value) {
   if (text.trim())

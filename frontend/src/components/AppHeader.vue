@@ -22,9 +22,15 @@
         <RouterLink
           :to="auth.isAuthenticated ? '/profile' : '/login'"
           class="account-link"
-          ><AppIcon name="user" /><span>{{
-            auth.isAuthenticated ? "Профиль" : "Войти"
-          }}</span></RouterLink
+          :class="{ 'account-avatar-link': auth.isAuthenticated }"
+          :aria-label="auth.isAuthenticated ? 'Личный кабинет' : 'Войти'"
+          :title="auth.isAuthenticated ? 'Личный кабинет' : 'Войти'"
+          ><UserAvatar v-if="auth.isAuthenticated" :user="auth.user" />
+          <svg v-if="auth.isAuthenticated" class="account-avatar-ring" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <path d="M22 43 A21 21 0 0 1 22 1" pathLength="100" />
+            <path d="M22 43 A21 21 0 0 0 22 1" pathLength="100" />
+          </svg>
+          <template v-else><AppIcon name="user" /><span>Войти</span></template></RouterLink
         >
       </div>
     </div>
@@ -33,6 +39,7 @@
 <script setup>
 import BrandMark from "./BrandMark.vue";
 import AppIcon from "./AppIcon.vue";
+import UserAvatar from "./UserAvatar.vue";
 import { useCartStore } from "@/stores/cart";
 import { useAuthStore } from "@/stores/auth";
 const cart = useCartStore();

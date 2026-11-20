@@ -28,6 +28,7 @@ const paths = {
   back: "M19 12H5 m6-6-6 6 6 6",
   plus: "M12 5v14 M5 12h14",
   minus: "M5 12h14",
+  logout: "M9 4H4v16h5 M9 12h12 m-5-5 5 5-5 5",
   trash: "M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7",
 };
 </script>

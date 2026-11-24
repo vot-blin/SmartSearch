@@ -16,6 +16,12 @@
 
       <button class="button-danger logout-btn" @click="logout">Выйти из аккаунта</button>
     </div>
+<<<<<<< Updated upstream
+=======
+    <RouterLink to="/ai-search" class="button-primary"
+      ><AppIcon name="spark" />Попробовать поиск по смыслу</RouterLink
+><button class="button-secondary" @click="logout">Выйти из аккаунта</button>
+>>>>>>> Stashed changes
   </div>
 </template>
 

@@ -1,6 +1,7 @@
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using SmartSearch.Models;
+using SmartSearch.Models.Search;
 
 namespace SmartSearch.Services.Vector;
 
@@ -58,6 +59,11 @@ public class QdrantVectorStore : IVectorStore
                 ["pid"] = item.product.Pid ?? "",
                 ["url"] = item.product.Url ?? "",
                 ["formatted_url"] = item.product.FormattedUrl ?? "",
+                ["color"] = ExtractSpec(item.product.FormattedSpecifications, "Color"),
+                ["gender"] = ExtractSpec(item.product.FormattedSpecifications, "Gender"),
+                ["material"] = ExtractSpec(item.product.FormattedSpecifications, "Material"),
+                ["season"] = ExtractSpec(item.product.FormattedSpecifications, "Season"),
+                ["product_type"] = (item.product.GenericName ?? "").Trim().ToLowerInvariant(),
             }
         }).ToList();
 
@@ -73,30 +79,103 @@ public class QdrantVectorStore : IVectorStore
         _logger.LogInformation("Indexed {Count} products in Qdrant collection '{Collection}'", points.Count, _collection);
     }
 
-    public async Task<List<SmartSearch.Models.Product>> SearchAsync(float[] queryVector, int limit = 10)
+    public async Task<List<SmartSearch.Models.Product>> SearchAsync(float[] queryVector, int limit = 10, ProductFilter? filter = null)
     {
-        var searchResult = await _client.SearchAsync(_collection, queryVector, limit: (ulong)limit);
+        var qdrantFilter = BuildFilter(filter);
+
+        var searchResult = await _client.SearchAsync(_collection, queryVector, filter: qdrantFilter, limit: (ulong)limit);
 
         var products = searchResult.Select(r => ReconstructProduct(r)).ToList();
 
-        _logger.LogInformation("Search returned {Count} products, first images: {Images}",
-            products.Count, products.FirstOrDefault()?.Images);
+        _logger.LogInformation("Search returned {Count} products (filter: {HasFilter})", products.Count, filter != null);
 
         return products;
     }
 
-    public async Task<List<(SmartSearch.Models.Product product, float score)>> SearchWithScoreAsync(float[] queryVector, int limit = 10)
+    public async Task<List<(SmartSearch.Models.Product product, float score)>> SearchWithScoreAsync(float[] queryVector, int limit = 10, ProductFilter? filter = null)
     {
-        var searchResult = await _client.SearchAsync(_collection, queryVector, limit: (ulong)limit);
+        var qdrantFilter = BuildFilter(filter);
 
-        var results = new List<(SmartSearch.Models.Product product, float score)>();
+        var searchResult = await _client.SearchAsync(_collection, queryVector, filter: qdrantFilter, limit: (ulong)limit);
+
+        return searchResult
+            .Select(r => (ReconstructProduct(r), (float)r.Score))
+            .ToList();
+
+        /*var results = new List<(SmartSearch.Models.Product product, float score)>();
 
         foreach (var r in searchResult)
         {
             results.Add((ReconstructProduct(r), (float)r.Score));
         }
 
-        return results;
+        return results;*/
+    }
+
+    private static Filter? BuildFilter(ProductFilter? f)
+    {
+        if (f == null) return null;
+
+        var must = new List<Condition>();
+
+        if (!string.IsNullOrWhiteSpace(f.Color))
+            must.Add(new Condition
+            {
+                Field = new FieldCondition
+                {
+                    Key = "color",
+                    Match = new Match { Keyword = f.Color.Trim().ToLowerInvariant() }
+                }
+            });
+
+        if (!string.IsNullOrWhiteSpace(f.Gender))
+            must.Add(new Condition
+            {
+                Field = new FieldCondition
+                {
+                    Key = "gender",
+                    Match = new Match { Keyword = f.Gender.Trim().ToLowerInvariant() }
+                }
+            });
+
+        if (!string.IsNullOrWhiteSpace(f.ProductType))
+            must.Add(new Condition
+            {
+                Field = new FieldCondition
+                {
+                    Key = "product_type",
+                    Match = new Match { Keyword = f.ProductType.Trim().ToLowerInvariant() }
+                }
+            });
+
+        if (f.PriceMin.HasValue || f.PriceMax.HasValue)
+        {
+            var range = new Qdrant.Client.Grpc.Range();
+            var hasBound = false;
+
+            if (f.PriceMin.HasValue)
+            {
+                range.Gte = (double)f.PriceMin.Value;
+                hasBound = true;
+            }
+            if (f.PriceMax.HasValue)
+            {
+                range.Lte = (double)f.PriceMax.Value;
+                hasBound = true;
+            }
+
+            if (hasBound)
+                must.Add(new Condition
+                {
+                    Field = new FieldCondition
+                    {
+                        Key = "price",
+                        Range = range
+                    }
+                });
+        }
+
+        return must.Count == 0 ? null : new Filter { Must = { must } };
     }
 
     public async Task ClearAsync()
@@ -217,5 +296,17 @@ public class QdrantVectorStore : IVectorStore
     private static bool GetPayloadBool(Google.Protobuf.Collections.MapField<string, Qdrant.Client.Grpc.Value> payload, string key)
     {
         return payload.TryGetValue(key, out var value) && value.BoolValue;
+    }
+
+    private static string ExtractSpec(string formattedSpecs, string label)
+    {
+        if (string.IsNullOrEmpty(formattedSpecs)) return "";
+        foreach (var part in formattedSpecs.Split('|'))
+        {
+            var kv = part.Split(':', 2);
+            if (kv.Length == 2 && kv[1].Trim().Equals(label, StringComparison.OrdinalIgnoreCase))
+                return kv[0].Trim().ToLowerInvariant();
+        }
+        return "";
     }
 }

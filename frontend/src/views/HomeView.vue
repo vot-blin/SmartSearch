@@ -20,12 +20,60 @@
           @add-to-cart="cart.addToCart"
         />
       </div>
+<<<<<<< Updated upstream
 
       <div v-if="products.totalPages > 1" class="pagination">
         <button
           class="page-btn"
           :disabled="products.currentPage === 1"
           @click="products.prevPage()"
+=======
+    </section>
+    <section class="catalog-section" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="catalog-title">
+            Каталог товаров
+            <span
+              v-if="!products.loading && !products.error"
+              class="total-badge"
+              >{{ products.totalCount }}</span
+            >
+          </h2>
+        </div>
+        <RouterLink to="/search" class="text-link"
+          >Поиск с фильтрами <AppIcon name="arrow"
+        /></RouterLink>
+      </div>
+      <div v-if="products.loading" class="empty-state" role="status">
+        <span class="spinner"></span> Загружаем каталог…
+      </div>
+      <div v-else-if="products.error" class="empty-state" role="alert">
+        <AppIcon name="bag" />
+        <h3>Каталог пока недоступен</h3>
+        <p>Не удалось связаться с сервером. Попробуй ещё раз.</p>
+        <button class="button-secondary" @click="products.fetchall(true)">
+          Повторить
+        </button>
+      </div>
+      <div v-else-if="!products.products.length" class="empty-state">
+        <h3>Каталог пока пуст</h3>
+        <p>Товары появятся здесь после загрузки на сервер.</p>
+      </div>
+      <template v-else>
+        <div class="grid-products">
+          <ProductCard
+            v-for="product in products.products"
+            :key="product.id"
+            :product="product"
+            @add-to-cart="cart.addToCart"
+          />
+        </div>
+        <nav
+          v-if="products.totalPages > 1"
+          class="pagination"
+          aria-label="Страницы каталога"
+>>>>>>> Stashed changes
         >
           ← Назад
         </button>

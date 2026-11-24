@@ -45,7 +45,17 @@ public class AiSearchService
 
         var queryVector = await _embeddings.GetEmbeddingAsync(searchQuery);
 
-        var products = await _vectorStore.SearchAsync(queryVector, limit);
+        var filter = new ProductFilter
+        {
+            Color = string.IsNullOrWhiteSpace(analysis.Color) ? null : analysis.Color,
+            Gender = string.IsNullOrWhiteSpace(analysis.Gender) ? null : analysis.Gender,
+            ProductType = string.IsNullOrWhiteSpace(analysis.ProductType) ? null : analysis.ProductType
+        }; //new
+
+        _logger.LogInformation("Filter - Color: {Color}, Gender: {Gender}, ProductType: {ProductType}",
+                filter.Color, filter.Gender, filter.ProductType);
+
+        var products = await _vectorStore.SearchAsync(queryVector, limit, filter); //new
 
         _logger.LogInformation("Found {Count} products", products.Count);
 

@@ -1,8 +1,16 @@
 <template>
   <div class="page">
+<<<<<<< Updated upstream
     <div class="section-box">
       <h1 class="page-title">Корзина</h1>
       <p class="subtitle">Проверяй товары и изменяй количество прямо здесь.</p>
+=======
+    <div>
+      <h1 class="page-title">
+        Корзина<span class="heading-count">{{ cart.totalCount }}</span>
+      </h1>
+      <p class="text">Всё, что понравилось, — в одном месте.</p>
+>>>>>>> Stashed changes
     </div>
 
     <div v-if="cart.items.length === 0" class="empty-state">

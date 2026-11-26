@@ -1,4 +1,5 @@
 using SmartSearch.Models;
+using SmartSearch.Models.Search;
 
 namespace SmartSearch.Services.Vector;
 
@@ -17,7 +18,8 @@ public class InMemoryVectorStore : IVectorStore
         return Task.CompletedTask;
     }
 
-    public Task<List<SmartSearch.Models.Product>> SearchAsync(float[] queryVector, int limit = 10)
+    public Task<List<SmartSearch.Models.Product>> SearchAsync(
+        float[] queryVector, int limit = 10, ProductFilter? filter = null)
     {
         List<(SmartSearch.Models.Product product, float[] vector)> snapshot;
         lock (_lock)
@@ -26,6 +28,7 @@ public class InMemoryVectorStore : IVectorStore
         }
 
         var results = snapshot
+            .Where(item => MatchesFilter(item.product, filter))
             .Select(item => (item.product, score: CosineSimilarity(queryVector, item.vector)))
             .OrderByDescending(x => x.score)
             .Take(limit)
@@ -35,7 +38,8 @@ public class InMemoryVectorStore : IVectorStore
         return Task.FromResult(results);
     }
 
-    public Task<List<(SmartSearch.Models.Product product, float score)>> SearchWithScoreAsync(float[] queryVector, int limit = 10)
+    public Task<List<(SmartSearch.Models.Product product, float score)>> SearchWithScoreAsync(
+        float[] queryVector, int limit = 10, ProductFilter? filter = null)
     {
         List<(SmartSearch.Models.Product product, float[] vector)> snapshot;
         lock (_lock)
@@ -44,6 +48,7 @@ public class InMemoryVectorStore : IVectorStore
         }
 
         var results = snapshot
+            .Where(item => MatchesFilter(item.product, filter))
             .Select(item => (item.product, score: CosineSimilarity(queryVector, item.vector)))
             .OrderByDescending(x => x.score)
             .Take(limit)
@@ -68,6 +73,38 @@ public class InMemoryVectorStore : IVectorStore
     }
 
     public Task<bool> IsHealthyAsync() => Task.FromResult(true);
+
+    private static bool MatchesFilter(SmartSearch.Models.Product p, ProductFilter? f)
+    {
+        if (f == null) return true;
+
+        var haystack = string.Join(" | ",
+            p.Title,
+            p.Description,
+            p.Highlights,
+            p.FormattedSpecifications,
+            p.Specifications,
+            p.GenericName,
+            p.SubCategory2,
+            p.SubCategory3);
+
+        if (!string.IsNullOrWhiteSpace(f.Color) &&
+            !haystack.Contains(f.Color, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(f.Gender) &&
+            !haystack.Contains(f.Gender, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(f.ProductType) &&
+            !haystack.Contains(f.ProductType, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (f.PriceMin.HasValue && p.Price < f.PriceMin.Value) return false;
+        if (f.PriceMax.HasValue && p.Price > f.PriceMax.Value) return false;
+
+        return true;
+    }
 
     private static float CosineSimilarity(float[] a, float[] b)
     {

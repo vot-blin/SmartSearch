@@ -91,8 +91,14 @@ builder.Services.AddSingleton<IVectorStore>(sp =>
 builder.Services.AddSingleton<IEmbeddingProvider, HashEmbeddingProvider>();
 
 // ── OpenRouter HTTP Client ───────────────────────────────────────────────────
-builder.Services.AddHttpClient("OpenRouter");
-
+//builder.Services.AddHttpClient("DeepSeek");
+builder.Services.AddHttpClient("DeepSeek", (sp, client) =>
+{
+    var cfg = sp.GetRequiredService<IConfiguration>();
+    client.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cfg["DeepSeek:ApiKey"]);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 // ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProductService>();

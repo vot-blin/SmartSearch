@@ -1,79 +1,40 @@
 <template>
-  <div class="page">
-    <div class="section-box profile-card">
-      <h1 class="page-title">Профиль</h1>
-
-      <div class="fields">
-        <div class="field">
-          <span class="field-label">Имя</span>
-          <span class="field-value">{{ auth.user?.name }}</span>
-        </div>
-        <div class="field">
-          <span class="field-label">Email</span>
-          <span class="field-value">{{ auth.user?.email }}</span>
-        </div>
+  <div class="profile-page section-box">
+    <div class="profile-heading">
+      <UserAvatar :user="auth.user" class="profile-avatar" large />
+      <div class="profile-intro">
+        <span class="eyebrow">ЛИЧНЫЙ КАБИНЕТ</span>
+        <h1 class="page-title">Привет, <span class="profile-name">{{ auth.user?.name || "друг" }}</span>.</h1>
+        <p class="text">Всё готово для новых находок.</p>
       </div>
-
-      <button class="button-danger logout-btn" @click="logout">Выйти из аккаунта</button>
     </div>
-<<<<<<< Updated upstream
-=======
-    <RouterLink to="/ai-search" class="button-primary"
-      ><AppIcon name="spark" />Попробовать поиск по смыслу</RouterLink
-><button class="button-secondary" @click="logout">Выйти из аккаунта</button>
->>>>>>> Stashed changes
+    <div class="fields">
+      <div class="field">
+        <span>Имя</span><strong>{{ auth.user?.name }}</strong>
+      </div>
+      <div class="field">
+        <span>Email</span><strong>{{ auth.user?.email }}</strong>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <RouterLink to="/ai-search" class="button-primary">
+        <AppIcon name="spark" />Попробовать поиск по смыслу
+      </RouterLink>
+      <button type="button" class="button-secondary profile-logout" @click="logout">
+        <AppIcon name="logout" />Выйти из аккаунта
+      </button>
+    </div>
   </div>
 </template>
-
 <script setup>
-import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
-
-const auth = useAuthStore()
-const router = useRouter()
-
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
+import AppIcon from "@/components/AppIcon.vue";
+import UserAvatar from "@/components/UserAvatar.vue";
+const auth = useAuthStore(),
+  router = useRouter();
 function logout() {
-  auth.logout()
-  router.push('/login')
+  auth.logout();
+  router.push("/login");
 }
 </script>
-
-<style scoped>
-.page {
-  max-width: 520px;
-  margin: 40px auto 0;
-}
-
-.profile-card {
-  padding: 28px;
-  display: grid;
-  gap: 24px;
-}
-
-.fields {
-  display: grid;
-  gap: 14px;
-}
-
-.field {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.08);
-}
-
-.field-label {
-  font-size: 14px;
-  color: #6e6782;
-}
-
-.field-value {
-  font-weight: 600;
-  color: #1f1b2e;
-}
-
-.logout-btn {
-  width: fit-content;
-}
-</style>
